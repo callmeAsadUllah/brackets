@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Alice",
+    "scores": [85, 90, 78]
+  },
+  {
+    "name": "Bob",
+    "scores": [82, 76, 88]
+  },
+  {
+    "name": "Charlie",
+    "scores": [90, 92, 85]
+  },
+  {
+    "name": "David",
+    "scores": [70, 75, 80]
+  },
+  {
+    "name": "Eve",
+    "scores": [95, 100, 98]
+  },
+  {
+    "name": "Frank",
+    "scores": [60, 65, 70]
+  },
+  {
+    "name": "Grace",
+    "scores": [88, 90, 92]
+  },
+  {
+    "name": "Hannah",
+    "scores": [78, 85, 80]
+  },
+  {
+    "name": "Ivy",
+    "scores": [85, 87, 89]
+  },
+  {
+    "name": "Jack",
+    "scores": [76, 74, 73]
+  },
+  {
+    "name": "Karen",
+    "scores": [90, 92, 94]
+  },
+  {
+    "name": "Leo",
+    "scores": [88, 87, 86]
+  },
+  {
+    "name": "Mia",
+    "scores": [91, 89, 92]
+  },
+  {
+    "name": "Nina",
+    "scores": [80, 82, 81]
+  },
+  {
+    "name": "Oscar",
+    "scores": [95, 93, 96]
+  },
+  {
+    "name": "Paul",
+    "scores": [68, 70, 65]
+  },
+  {
+    "name": "Quinn",
+    "scores": [87, 89, 88]
+  },
+  {
+    "name": "Rose",
+    "scores": [79, 78, 80]
+  },
+  {
+    "name": "Sam",
+    "scores": [95, 97, 98]
+  },
+  {
+    "name": "Tom",
+    "scores": [72, 74, 75]
+  },
+  {
+    "name": "Uma",
+    "scores": [90, 91, 92]
+  }
+]
