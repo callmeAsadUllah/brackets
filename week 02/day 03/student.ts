@@ -34,12 +34,12 @@ class StudentManager {
     return this.students.length;
   }
 }
-const studentObject0 = new Student("M. Asad Ullah", 21, [2, 4, 5]);
-const studentObject1 = new Student("Amna", 22, [2, 4, 5]);
+const studentObject1 = new Student("M. Asad Ullah", 21, [2, 4, 5]);
+const studentObject2 = new Student("Amna", 22, [2, 4, 5]);
 
-const studentManagerObject0 = new StudentManager();
+const studentManagerObject1 = new StudentManager();
 
-studentManagerObject0.addStudent(studentObject0);
-studentManagerObject0.addStudent(studentObject1);
+studentManagerObject1.addStudent(studentObject1);
+studentManagerObject1.addStudent(studentObject2);
 
-console.log(studentManagerObject0.getStudents());
+console.log(studentManagerObject1.getStudents());

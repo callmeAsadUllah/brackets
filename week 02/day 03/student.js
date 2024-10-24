@@ -26,9 +26,9 @@ var StudentManager = /** @class */ (function () {
     };
     return StudentManager;
 }());
-var studentObject0 = new Student("M. Asad Ullah", 21, [2, 4, 5]);
-var studentObject1 = new Student("Amna", 22, [2, 4, 5]);
-var studentManagerObject0 = new StudentManager();
-studentManagerObject0.addStudent(studentObject0);
-studentManagerObject0.addStudent(studentObject1);
-console.log(studentManagerObject0.getStudents());
+var studentObject1 = new Student("M. Asad Ullah", 21, [2, 4, 5]);
+var studentObject2 = new Student("Amna", 22, [2, 4, 5]);
+var studentManagerObject1 = new StudentManager();
+studentManagerObject1.addStudent(studentObject1);
+studentManagerObject1.addStudent(studentObject2);
+console.log(studentManagerObject1.getStudents());
