@@ -1,0 +1,16 @@
+{
+  "name": "day-06",
+  "version": "1.0.0",
+  "main": "crud.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "M. Asad Ullah",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node": "^22.7.9",
+    "json-server": "^1.0.0-beta.3",
+    "typescript": "^5.6.3"
+  }
+}
