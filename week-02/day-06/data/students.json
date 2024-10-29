@@ -1,12 +1,1 @@
-[
-  { "studentID": 1, "name": "Alice", "age": 20, "scores": [85, 90, 78] },
-  { "studentID": 2, "name": "Bob", "age": 22, "scores": [88, 92, 95] },
-  { "studentID": 3, "name": "Charlie", "age": 19, "scores": [70, 65, 60] },
-  { "studentID": 4, "name": "Diana", "age": 21, "scores": [92, 89, 95] },
-  { "studentID": 5, "name": "Ethan", "age": 20, "scores": [50, 55, 60] },
-  { "studentID": 6, "name": "Fiona", "age": 23, "scores": [90, 93, 88] },
-  { "studentID": 7, "name": "George", "age": 18, "scores": [75, 70, 65] },
-  { "studentID": 8, "name": "Hannah", "age": 21, "scores": [95, 97, 96] },
-  { "studentID": 9, "name": "Ian", "age": 22, "scores": [82, 84, 86] },
-  { "studentID": 10, "name": "Julia", "age": 19, "scores": [60, 70, 68] }
-]
+[]

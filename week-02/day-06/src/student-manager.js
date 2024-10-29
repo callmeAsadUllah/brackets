@@ -40,60 +40,38 @@ var promises_1 = require("node:readline/promises");
 var node_process_1 = require("node:process");
 var node_fs_1 = require("node:fs");
 var rl = (0, promises_1.createInterface)({ input: node_process_1.stdin, output: node_process_1.stdout });
-var CRUD = /** @class */ (function () {
-    function CRUD() {
+var StudentManager = /** @class */ (function () {
+    function StudentManager() {
+        this.students = [];
     }
-    CRUD.prototype.createStudent = function (student) {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
-    };
-    CRUD.prototype.readStudent = function (id) {
+    StudentManager.prototype.listStudents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, null];
-            });
-        });
-    };
-    CRUD.prototype.updateStudent = function (id, student) {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
-    };
-    CRUD.prototype.deleteStudent = function (id) {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
-    };
-    CRUD.prototype.getAllStudents = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var data;
+            var data, students;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, node_fs_1.promises.readFile("./../data/students.json", "utf-8")];
                     case 1:
                         data = _a.sent();
-                        return [2 /*return*/, JSON.parse(data)];
+                        students = JSON.parse(data);
+                        console.table(students);
+                        return [2 /*return*/];
                 }
             });
         });
     };
-    return CRUD;
+    return StudentManager;
 }());
-function main() {
-    return __awaiter(this, void 0, void 0, function () {
-        var crudObject1, students;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    crudObject1 = new CRUD();
-                    return [4 /*yield*/, crudObject1.getAllStudents()];
-                case 1:
-                    students = _a.sent();
-                    console.table(students);
-                    return [2 /*return*/];
-            }
-        });
+var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var studentManager;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                studentManager = new StudentManager();
+                return [4 /*yield*/, studentManager.listStudents()];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
     });
-}
-main().catch(console.error);
+}); };
+main();
