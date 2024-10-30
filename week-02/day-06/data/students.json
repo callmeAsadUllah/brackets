@@ -1,1 +1,40 @@
-[]
+[
+  {
+    "studentId": "0x95-54",
+    "name": "Amna",
+    "age": 21,
+    "scores": [
+      {
+        "subject": "english",
+        "grade": 100
+      },
+      {
+        "subject": "mathematics",
+        "grade": 100
+      },
+      {
+        "subject": "computer science",
+        "grade": 100
+      }
+    ]
+  },
+  {
+    "studentId": "0xe6-54",
+    "name": "Asad Ullah",
+    "age": 22,
+    "scores": [
+      {
+        "subject": "english",
+        "grade": 90
+      },
+      {
+        "subject": "mathematics",
+        "grade": 100
+      },
+      {
+        "subject": "computer science",
+        "grade": 10
+      }
+    ]
+  }
+]

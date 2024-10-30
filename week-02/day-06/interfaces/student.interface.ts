@@ -6,7 +6,7 @@ export interface IScoreDetail {
 }
 
 export interface IStudent {
-  studentID: string;
+  studentId: string;
   name: string;
   age: number;
   scores: IScoreDetail[];
