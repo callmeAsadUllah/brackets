@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'students' })
 export class Student {
   @PrimaryGeneratedColumn('uuid', { name: 'student_id' })
   studentId: string;
@@ -15,7 +15,7 @@ export class Student {
   username: string;
 
   @Column({ name: 'first_name', nullable: true })
-  firstName: string;
+  firstName?: string;
 
   @Column({ name: 'last_name', nullable: true })
   lastName: string;

@@ -6,7 +6,8 @@ import {
   Param,
   Post,
   Put,
-  Patch,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 
 import { StudentsService } from './students.service';
@@ -15,32 +16,44 @@ import { Student } from './student.entity';
 
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentService: StudentsService) {}
+  constructor(private readonly studentsService: StudentsService) {}
   @Get()
-  findAll(): Promise<Student[]> {
-    return this.studentService.findListStudent();
+  async findListStudent(): Promise<Student[]> {
+    return this.studentsService.findListStudent();
   }
 
   @Get(':studentId')
-  findOne(@Param('studentId') studentId: string): Promise<Student> {
-    return this.studentService.findOneStudent(studentId);
+  async findOneStudent(
+    @Param('studentId') studentId: string,
+  ): Promise<Student> {
+    return this.studentsService.findOneStudent(studentId);
   }
 
   @Post()
-  createStudent(@Body() student: Student): Promise<Student> {
-    return this.studentService.createStudent(student);
+  async createStudent(@Body() student: Student): Promise<Student> {
+    try {
+      return await this.studentsService.createStudent(student);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Error creating student',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Put(':studentId')
-  updateStudent(
+  asyncupdateStudent(
     @Param('studentId') studentId: string,
     @Body() student: Student,
   ): Promise<Student> {
-    return this.studentService.updateStudent(studentId, student);
+    return this.studentsService.updateStudent(studentId, student);
   }
 
   @Delete(':studentId')
-  deleteStudent(@Param('studentId') studentId: string): Promise<void> {
-    return this.studentService.deleteStudent(studentId);
+  async deleteStudent(@Param('studentId') studentId: string): Promise<void> {
+    return this.studentsService.deleteStudent(studentId);
   }
 }
