@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { StudentsModule } from './students/students.module';
 
 import { Student } from './students/student.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Student } from './students/student.entity';
       synchronize: true,
     }),
     StudentsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

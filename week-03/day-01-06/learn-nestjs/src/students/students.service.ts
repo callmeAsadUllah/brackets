@@ -1,14 +1,14 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
 import { Student } from './student.entity';
+
+import { CreateStudentDTO } from './create-student.dto';
+import { UpdateStudentDTO } from './update-student.dto';
+import { UpdateStudentPartialDTO } from './update-student-partial.dto';
 
 @Injectable()
 export class StudentsService {
@@ -19,58 +19,58 @@ export class StudentsService {
 
   async findListStudent(): Promise<Student[]> {
     const students = await this.studentsRepository.find();
-    return students.length ? students : [];
+    return students;
+  }
+
+  async createStudent(createStudentDTO: CreateStudentDTO): Promise<Student> {
+    const student = this.studentsRepository.create(createStudentDTO);
+    return await this.studentsRepository.save(student);
+  }
+
+  async updateStudent(
+    studentId: string,
+    updateStudentDTO: UpdateStudentDTO,
+  ): Promise<Student> {
+    const student = await this.studentsRepository.findOne({
+      where: { studentId: studentId },
+    });
+    const updatedStudent = {
+      ...student,
+      ...updateStudentDTO,
+    };
+    return await this.studentsRepository.save(updatedStudent);
+  }
+
+  async updateStudentPartial(
+    studentId: string,
+    updateStudentPartialDTO: UpdateStudentPartialDTO,
+  ): Promise<Student> {
+    const student = await this.studentsRepository.findOne({
+      where: { studentId: studentId },
+    });
+    const updatedStudentPartial = {
+      ...student,
+      ...updateStudentPartialDTO,
+    };
+    return await this.studentsRepository.save(updatedStudentPartial);
   }
 
   async findOneStudent(studentId: string): Promise<Student> {
-    try {
-      const student = await this.studentsRepository.findOne({
-        where: { studentId },
-      });
-
-      if (!student) {
-        throw new NotFoundException(`Student with ID ${studentId} not found`);
-      }
-
-      return student;
-    } catch (error) {
-      throw new Error(
-        'An error occurred while retrieving the student: ' + error.message,
-      );
-    }
-  }
-
-  async createStudent(student: Student): Promise<Student> {
-    try {
-      const newStudent = this.studentsRepository.create(student);
-      return await this.studentsRepository.save(newStudent);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to create student');
-    }
-  }
-  async updateStudent(
-    studentId: string,
-    studentData: Student,
-  ): Promise<Student> {
     const student = await this.studentsRepository.findOne({
-      where: { studentId },
+      where: { studentId: studentId },
     });
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${studentId} not found`);
-    }
-    await this.studentsRepository.update(studentId, studentData);
-    return this.studentsRepository.findOne({ where: { studentId } });
+    return student;
   }
 
   async deleteStudent(studentId: string): Promise<void> {
     const student = await this.studentsRepository.findOne({
-      where: { studentId },
+      where: { studentId: studentId },
     });
 
     if (!student) {
-      throw new NotFoundException(`Student with ID ${studentId} not found`);
+      throw new Error(`Student with ID ${studentId} not found`);
     }
 
-    await this.studentsRepository.delete(studentId);
+    await this.studentsRepository.delete(student);
   }
 }

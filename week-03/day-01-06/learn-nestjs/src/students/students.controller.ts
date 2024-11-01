@@ -6,54 +6,62 @@ import {
   Param,
   Post,
   Put,
-  HttpStatus,
-  HttpException,
+  Patch,
 } from '@nestjs/common';
 
 import { StudentsService } from './students.service';
 
 import { Student } from './student.entity';
+import { CreateStudentDTO } from './create-student.dto';
+import { UpdateStudentDTO } from './update-student.dto';
+import { UpdateStudentPartialDTO } from './update-student-partial.dto';
 
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
   @Get()
   async findListStudent(): Promise<Student[]> {
-    return this.studentsService.findListStudent();
+    return await this.studentsService.findListStudent();
+  }
+
+  @Post()
+  async createStudent(
+    @Body() createStudentDTO: CreateStudentDTO,
+  ): Promise<Student> {
+    return await this.studentsService.createStudent(createStudentDTO);
+  }
+
+  @Put(':studentId')
+  async updateStudent(
+    @Param('studentId') studentId: string,
+    @Body() updateStudentDTO: UpdateStudentDTO,
+  ): Promise<Student> {
+    return await this.studentsService.updateStudent(
+      studentId,
+      updateStudentDTO,
+    );
+  }
+
+  @Patch(':studentId')
+  async updateStudentPartial(
+    @Param('studentId') studentId: string,
+    @Body() updateStudentPartial: UpdateStudentPartialDTO,
+  ): Promise<Student> {
+    return await this.studentsService.updateStudentPartial(
+      studentId,
+      updateStudentPartial,
+    );
   }
 
   @Get(':studentId')
   async findOneStudent(
     @Param('studentId') studentId: string,
   ): Promise<Student> {
-    return this.studentsService.findOneStudent(studentId);
-  }
-
-  @Post()
-  async createStudent(@Body() student: Student): Promise<Student> {
-    try {
-      return await this.studentsService.createStudent(student);
-    } catch (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: 'Error creating student',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Put(':studentId')
-  asyncupdateStudent(
-    @Param('studentId') studentId: string,
-    @Body() student: Student,
-  ): Promise<Student> {
-    return this.studentsService.updateStudent(studentId, student);
+    return await this.studentsService.findOneStudent(studentId);
   }
 
   @Delete(':studentId')
   async deleteStudent(@Param('studentId') studentId: string): Promise<void> {
-    return this.studentsService.deleteStudent(studentId);
+    return await this.studentsService.deleteStudent(studentId);
   }
 }

@@ -6,4 +6,4 @@
 
 #### `nest generate controller students`
 
-#### `nest g m / s / c` m (for module), s (for service), c (for controller) can be used as well.
+#### `nest g m / s / c` g (for generate), m (for module), s (for service), c (for controller) can be used as well.
