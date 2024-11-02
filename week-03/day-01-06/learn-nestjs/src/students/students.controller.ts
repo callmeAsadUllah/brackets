@@ -6,58 +6,66 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  Res,
   Patch,
 } from '@nestjs/common';
 
 import { StudentsService } from './students.service';
 
 import { Student } from './student.entity';
-import { CreateStudentDTO } from './create-student.dto';
-import { UpdateStudentDTO } from './update-student.dto';
-import { UpdateStudentPartialDTO } from './update-student-partial.dto';
+import { CreateStudentDto } from './create-student.dto';
+import { UpdateStudentDto } from './update-student.dto';
+import { UpdateStudentPartialDto } from './update-student-partial.dto';
+import { Response } from 'express';
 
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
   @Get()
   async findListStudent(): Promise<Student[]> {
-    return await this.studentsService.findListStudent();
+    const students = await this.studentsService.findListStudent();
+    return students;
   }
 
   @Post()
   async createStudent(
-    @Body() createStudentDTO: CreateStudentDTO,
+    @Body() createStudentDto: CreateStudentDto,
   ): Promise<Student> {
-    return await this.studentsService.createStudent(createStudentDTO);
+    const student = await this.studentsService.createStudent(createStudentDto);
+    return student;
   }
 
   @Put(':studentId')
   async updateStudent(
     @Param('studentId') studentId: string,
-    @Body() updateStudentDTO: UpdateStudentDTO,
+    @Body() updateStudentDto: UpdateStudentDto,
   ): Promise<Student> {
-    return await this.studentsService.updateStudent(
+    const student = await this.studentsService.updateStudent(
       studentId,
-      updateStudentDTO,
+      updateStudentDto,
     );
+    return student;
   }
 
   @Patch(':studentId')
   async updateStudentPartial(
     @Param('studentId') studentId: string,
-    @Body() updateStudentPartial: UpdateStudentPartialDTO,
+    @Body() updateStudentPartialDto: UpdateStudentPartialDto,
   ): Promise<Student> {
-    return await this.studentsService.updateStudentPartial(
+    const student = await this.studentsService.updateStudentPartial(
       studentId,
-      updateStudentPartial,
+      updateStudentPartialDto,
     );
+    return student;
   }
 
   @Get(':studentId')
   async findOneStudent(
     @Param('studentId') studentId: string,
   ): Promise<Student> {
-    return await this.studentsService.findOneStudent(studentId);
+    const student = await this.studentsService.findOneStudent(studentId);
+    return student;
   }
 
   @Delete(':studentId')

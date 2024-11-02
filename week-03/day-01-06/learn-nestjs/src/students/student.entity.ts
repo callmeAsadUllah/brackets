@@ -25,12 +25,6 @@ export class Student implements IStudent {
   @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ name: 'password' })
-  password: string;
-
-  @Column({ name: 'confirm_password', nullable: true })
-  confirmPassword?: string;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
