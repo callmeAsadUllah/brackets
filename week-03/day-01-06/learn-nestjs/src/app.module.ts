@@ -14,7 +14,7 @@ import { Student } from './students/student.entity';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'data/db.sqlite',
+      database: process.env.DATABASE_PATH,
       entities: [Student],
       synchronize: true,
     }),
