@@ -36,14 +36,12 @@ export class StudentsService {
     studentId: string,
     updateStudentDto: UpdateStudentDto,
   ): Promise<Student> {
-    const student = await this.studentModel.findByIdAndUpdate(
-      studentId,
-      updateStudentDto,
-      {
+    const student = await this.studentModel
+      .findByIdAndUpdate(studentId, updateStudentDto, {
         new: true,
         runValidators: true,
-      },
-    );
+      })
+      .exec();
     return student;
   }
 
@@ -51,14 +49,12 @@ export class StudentsService {
     studentId: string,
     updateStudentPartialDto: UpdateStudentPartialDto,
   ): Promise<Student> {
-    const student = await this.studentModel.findByIdAndUpdate(
-      studentId,
-      updateStudentPartialDto,
-      {
+    const student = await this.studentModel
+      .findByIdAndUpdate(studentId, updateStudentPartialDto, {
         new: true,
         runValidators: true,
-      },
-    );
+      })
+      .exec();
     return student;
   }
 
@@ -82,6 +78,6 @@ export class StudentsService {
   }
 
   async deleteStudent(studentId: string): Promise<void> {
-    await this.studentModel.findByIdAndDelete(studentId);
+    await this.studentModel.findByIdAndDelete(studentId).exec();
   }
 }

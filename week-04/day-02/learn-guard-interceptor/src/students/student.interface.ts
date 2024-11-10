@@ -1,4 +1,4 @@
-import { IRole } from 'src/role/role.interface';
+import { IRole } from 'src/roles/role.interface';
 
 export interface IStudent {
   username: string;

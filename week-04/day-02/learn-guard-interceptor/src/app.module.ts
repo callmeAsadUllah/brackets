@@ -5,10 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { StudentsModule } from './students/students.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
 import { StudentsService } from './students/students.service';
 import { Student, StudentSchema } from './students/student.schema';
-import { AuthService } from './auth/auth.service';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { RolesGuard } from './roles/roles.guard';
+import { LoggingInterceptor } from 'logging/logging.interceptor';
 
 @Module({
   imports: [
@@ -31,18 +32,16 @@ import { AuthService } from './auth/auth.service';
         },
       },
     ]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
-      }),
-      inject: [ConfigService],
-    }),
+
     StudentsModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService, StudentsService],
+  providers: [
+    AppService,
+    StudentsService,
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+    RolesGuard,
+  ],
 })
 export class AppModule {}

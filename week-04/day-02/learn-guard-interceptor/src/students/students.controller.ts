@@ -8,6 +8,7 @@ import {
   Put,
   Patch,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { StudentsService } from './students.service';
@@ -16,14 +17,19 @@ import { CreateStudentDto } from './create-student.dto';
 import { UpdateStudentDto } from './update-student.dto';
 import { UpdateStudentPartialDto } from './update-student-partial.dto';
 import { Student } from './student.schema';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { LoggingInterceptor } from 'logging/logging.interceptor';
+import { Role } from 'src/roles/role.enum';
 
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @UseGuards(AuthGuard)
   @Get()
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseInterceptors(LoggingInterceptor)
   async findListStudents(): Promise<Student[]> {
     const students = await this.studentsService.findListStudents();
     return students;
@@ -61,7 +67,6 @@ export class StudentsController {
     return student;
   }
 
-  @UseGuards(AuthGuard)
   @Get(':studentId')
   async findOneByStudentId(
     @Param('studentId') studentId: string,
@@ -70,7 +75,6 @@ export class StudentsController {
     return student;
   }
 
-  @UseGuards(AuthGuard)
   @Get(':email')
   async findOneByStudentEmail(@Param('email') email: string): Promise<Student> {
     const student = await this.studentsService.findOneByStudentId(email);
