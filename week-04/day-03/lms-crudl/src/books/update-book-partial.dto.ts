@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsDate, IsEnum } from 'class-validator';
 import { GenreEnum } from 'src/genres/genre.enum';
 
-export class UpdateBookDTO {
+export class UpdateBookPartialDTO {
   @IsOptional()
   @IsString()
   title?: string;

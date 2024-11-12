@@ -1,4 +1,4 @@
-import { RoleEnum } from './role.enum';
+import { RoleEnum } from './roles.enum';
 
 export interface IRole {
   name: RoleEnum;

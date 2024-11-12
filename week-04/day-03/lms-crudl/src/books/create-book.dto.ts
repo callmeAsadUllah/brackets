@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { GenreEnum } from 'src/genres/genre.enum';
 
-export class CreateBookDto {
+export class CreateBookDTO {
   @IsNotEmpty()
   @IsString()
   title: string;
