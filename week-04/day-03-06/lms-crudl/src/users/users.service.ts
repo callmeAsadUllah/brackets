@@ -4,11 +4,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RegisterUserDTO } from './register-user.dto';
 import { UserDocument } from './user.type';
-import { LogInUserDTO } from './log-in-user.dto';
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/auth/auth.service';
-
+import {
+  IUserResponse,
+  IUserRegisterResponse,
+} from 'src/interfaces/response.interface';
+import * as bcryptjs from 'bcryptjs';
 @Injectable()
 export class UsersService {
   constructor(
@@ -53,83 +55,138 @@ export class UsersService {
     return users;
   }
 
-  async registerUser(registerUserDTO: RegisterUserDTO): Promise<User> {
-    const registeredUser = new this.userModel({
-      ...registerUserDTO,
-    });
-    return await registeredUser.save();
+  // async registerUser(
+  //   registerUserDTO: RegisterUserDTO,
+  // ): Promise<IUserRegisterResponse> {
+  //   const existingUserEmail = await this.findOneUserByEmail(
+  //     registerUserDTO.email,
+  //   );
+  //   if (existingUserEmail) {
+  //     throw new Error('User already exists with this email.');
+  //   }
+  //   const existingUserUsername = await this.findOneUserByUsername(
+  //     registerUserDTO.username,
+  //   );
+  //   if (existingUserUsername) {
+  //     throw new Error('User already exists with this username.');
+  //   }
+  //   const registeringUser = new this.userModel({
+  //     ...registerUserDTO,
+  //   });
+  //   const user = await registeringUser.save();
+  //   return {
+  //     message: '',
+  //     data: user,
+  //   };
+  // }
+
+  //   async logInUser(logInUserDTO: LogInUserDTO): Promise<IUserLogInResponse> {
+  //     const user = await this.findOneUserByEmail(logInUserDTO.email);
+  //
+  //     if (!user) {
+  //       throw new Error('User not found');
+  //     }
+  //
+  //     const isPasswordValid = await this.validatePassword(
+  //       logInUserDTO.password,
+  //       user.password,
+  //     );
+  //     if (!isPasswordValid) {
+  //       throw new Error('Incorrect password');
+  //     }
+  //
+  //     const accessToken = await this.generateAccessToken(user);
+  //     const refreshToken = await this.generateRefreshToken(user);
+  //
+  //     if (!refreshToken || !accessToken) throw new Error('error');
+  //
+  //     user.refreshToken = refreshToken;
+  //     await user.save();
+  //
+  //     const loggedInUser = await this.userModel
+  //       .findById(user._id)
+  //       .select('-password -refreshToken');
+  //
+  //     return;
+  //   }
+
+  async validatePassword(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    const isPasswordValid = await bcryptjs.compare(
+      plainPassword,
+      hashedPassword,
+    );
+    return isPasswordValid;
   }
 
-  async logInUser(
-    logInUserDTO: LogInUserDTO,
-  ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
+  //
+  //   async refreshToken(refreshToken: string): Promise<object> {
+  //     const secretKey = await this.authService.getRefreshToken();
+  //     const decodedToken = await this.jwtService.verifyAsync(refreshToken, {
+  //       secret: secretKey,
+  //     });
+  //     const user = await this.findOneUserById(decodedToken.userId);
+  //
+  //     const accessToken = await this.generateAccessToken(user);
+  //     const newRefreshToken = await this.generateRefreshToken(user);
+  //     user.refreshToken = newRefreshToken;
+  //     // await user.save();
+  //     return {
+  //       accessToken,
+  //       refreshToken: newRefreshToken,
+  //     };
+  //   }
+  //
+  //   async logOutUser(userId: string): Promise<object> {
+  //     let logOutUser = await this.userModel.findOneAndUpdate(
+  //       { _id: userId },
+  //       { $unset: { refreshToken: 1 } },
+  //       { new: true },
+  //     );
+  //
+  //     logOutUser = await this.userModel
+  //       .findById(userId)
+  //       .select('-_id -password -createdAt -updatedAt -__v -refreshToken -books');
+  //
+  //     return {
+  //       message: 'User logged Out Successfully',
+  //       logOutUser: logOutUser,
+  //     };
+  //   }
+  async findOneUserById(userId: string): Promise<IUserResponse> {
     const user = await this.userModel
-      .findOne({ email: logInUserDTO.email })
+      .findById(userId)
+      .populate('books')
+      .select('-password -refreshToken -role')
       .exec();
 
     if (!user) {
-      throw new Error('User not found');
+      return { message: 'User not found', data: null };
     }
-    const isPasswordCorrect = await bcrypt.compare(
-      logInUserDTO.password,
-      user.password,
-    );
-    if (!isPasswordCorrect) throw new Error('Incorrect password');
-
-    const accessToken = await this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
-
-    if (!refreshToken || !accessToken) throw new Error('error');
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    const loggedInUser = await this.userModel
-      .findById(user._id)
-      .select('-password -refreshToken');
 
     return {
-      user: loggedInUser,
-      accessToken,
-      refreshToken,
+      message: 'User found',
+      data: {
+        username: user.username,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user.email,
+        role: {
+          name: user.role,
+        },
+      },
     };
   }
 
-  async refreshToken(refreshToken: string): Promise<object> {
-    const secretKey = await this.authService.getRefreshToken();
-    const decodedToken = await this.jwtService.verifyAsync(refreshToken, {
-      secret: secretKey,
-    });
-    const user = await this.findUserById(decodedToken.userId);
-
-    const accessToken = await this.generateAccessToken(user);
-    const newRefreshToken = await this.generateRefreshToken(user);
-    user.refreshToken = newRefreshToken;
-    // await user.save();
-    return {
-      accessToken,
-      refreshToken: newRefreshToken,
-    };
+  async findOneUserByUsername(username: string): Promise<IUserResponse> {
+    const user = await this.userModel.findOne({ $or: [{ username }] }).exec();
+    return { message: '', data: user };
   }
 
-  async logOutUser(userId: string): Promise<object> {
-    let logOutUser = await this.userModel.findOneAndUpdate(
-      { _id: userId },
-      { $unset: { refreshToken: 1 } },
-      { new: true },
-    );
-
-    logOutUser = await this.userModel
-      .findById(userId)
-      .select('-_id -password -createdAt -updatedAt -__v -refreshToken -books');
-
-    return {
-      message: 'User logged Out Successfully',
-      logOutUser: logOutUser,
-    };
-  }
-
-  async findUserById(userId: string): Promise<User | null> {
-    return this.userModel.findById(userId).exec();
+  async findOneUserByEmail(email: string): Promise<IUserResponse> {
+    const user = await this.userModel.findOne({ $or: [{ email }] }).exec();
+    return { message: '', data: user };
   }
 }

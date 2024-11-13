@@ -1,3 +1,5 @@
+import { IGenre } from 'src/genres/genre.interface';
+
 export interface IBook {
   title: string;
   description?: string;
@@ -5,5 +7,5 @@ export interface IBook {
   publishedDate?: Date;
 
   // relationship
-  genre: string;
+  genre: IGenre;
 }

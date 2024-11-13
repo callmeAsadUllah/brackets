@@ -1,11 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { Book } from 'src/books/book.schema';
 import { RoleEnum } from 'src/roles/roles.enum';
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, index: true })
   username: string;
 
   @Prop({ required: false })
@@ -14,7 +13,7 @@ export class User {
   @Prop({ required: false })
   lastName?: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, index: true })
   email: string;
 
   @Prop({ required: true })
@@ -30,7 +29,7 @@ export class User {
 
   // relationship
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Book' }] })
-  books: Book[];
+  books: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
