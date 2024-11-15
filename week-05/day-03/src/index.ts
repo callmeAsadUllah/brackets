@@ -2,11 +2,10 @@ import { connectDB, disconnectDB } from "./db";
 import { IUser } from "./user.interface";
 import {
   createUser,
-  deleteUser,
-  updateUser,
-  getAllUsers,
-  getUserById,
-  measureQueryWithIndexes,
+  findUserByIdAnDelete,
+  findUserByIdAndUpdate,
+  findUserById,
+  findUsers,
 } from "./crudl";
 
 export const users: IUser[] = [
@@ -61,17 +60,8 @@ export const createMultipleUsers = async (users: IUser[]) => {
 const startApp = async () => {
   try {
     await connectDB();
-    // const createdUsers = await createMultipleUsers(users);
-    // await getUserById("113141");
-    // await deleteUser("113141");
-    // await updateUser("113141", { firstName: "John" });
-    // await sortUserByDOB();
-    // const allUsers = await getAllUsers();
-    // console.log(allUsers);
-    // await usersInProfession();
-    // await filteredUserByProfession();
-    // await filteredUserByEmail("bob.user@example.com");
-    await measureQueryWithIndexes();
+    const findListUsers = await findUsers();
+    console.log("Users List:", findListUsers);
     disconnectDB();
   } catch (error) {
     throw new Error(`Error creating user: ${error}`);

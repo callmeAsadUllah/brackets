@@ -53,30 +53,3 @@ export const findUserByIdAnDelete = async (userId: string): Promise<void> => {
     throw new Error(`Error deleting user: ${error}`);
   }
 };
-
-export const findUsersByProfession = async (
-  profession: string
-): Promise<IUser[]> => {
-  try {
-    const users = await User.find({ profession: profession });
-    if (!users) throw new Error("User not found");
-    return users;
-  } catch (error) {
-    throw new Error(`Error fetching user by profession: ${error}`);
-  }
-};
-
-export const measureQueryWithIndexes = async () => {
-  const startTime = Date.now();
-  const result = await User.find({ profession: "Software Engineer" }).explain(
-    "executionStats"
-  );
-  const endTime = Date.now();
-
-  console.log(
-    "Query Execution Time (With Indexes):",
-    endTime - startTime,
-    "ms"
-  );
-  console.log("Query Plan:", result);
-};
