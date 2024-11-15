@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Res,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,7 +17,7 @@ import { Response } from 'express';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
   @Get(':userId')
@@ -18,18 +25,22 @@ export class UsersController {
     @Param('userId') userId: string,
     @Res() response: Response,
   ): Promise<void> {
-    const result = await this.usersService.findOneUserById(userId);
+    try {
+      const result = await this.usersService.findOneUserById(userId);
 
-    if (!result.data) {
-      response.status(HttpStatus.NOT_FOUND).json({
-        message: 'User not found',
-        data: null,
+      if (!result.data) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
+      response.status(HttpStatus.OK).json({
+        message: 'User found',
+        data: result.data,
+      });
+    } catch (error) {
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'An error occurred',
+        error: error.message,
       });
     }
-
-    response.status(HttpStatus.OK).json({
-      message: 'User found',
-      data: result.data,
-    });
   }
 }

@@ -1,4 +1,12 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -8,9 +16,12 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/auth/auth.service';
 import {
   IUserResponse,
+  IUserLogInResponse,
   IUserRegisterResponse,
 } from 'src/interfaces/response.interface';
 import * as bcryptjs from 'bcryptjs';
+import { LogInUserDTO } from './log-in-user.dto';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -55,70 +66,75 @@ export class UsersService {
     return users;
   }
 
-  // async registerUser(
-  //   registerUserDTO: RegisterUserDTO,
-  // ): Promise<IUserRegisterResponse> {
-  //   const existingUserEmail = await this.findOneUserByEmail(
-  //     registerUserDTO.email,
-  //   );
-  //   if (existingUserEmail) {
-  //     throw new Error('User already exists with this email.');
-  //   }
-  //   const existingUserUsername = await this.findOneUserByUsername(
-  //     registerUserDTO.username,
-  //   );
-  //   if (existingUserUsername) {
-  //     throw new Error('User already exists with this username.');
-  //   }
-  //   const registeringUser = new this.userModel({
-  //     ...registerUserDTO,
-  //   });
-  //   const user = await registeringUser.save();
-  //   return {
-  //     message: '',
-  //     data: user,
-  //   };
-  // }
+  async registerUser(
+    registerUserDTO: RegisterUserDTO,
+  ): Promise<IUserRegisterResponse> {
+    const existingUserEmail = await this.findOneUserByEmail(
+      registerUserDTO.email,
+    );
 
-  //   async logInUser(logInUserDTO: LogInUserDTO): Promise<IUserLogInResponse> {
-  //     const user = await this.findOneUserByEmail(logInUserDTO.email);
-  //
-  //     if (!user) {
-  //       throw new Error('User not found');
-  //     }
-  //
-  //     const isPasswordValid = await this.validatePassword(
-  //       logInUserDTO.password,
-  //       user.password,
-  //     );
-  //     if (!isPasswordValid) {
-  //       throw new Error('Incorrect password');
-  //     }
-  //
-  //     const accessToken = await this.generateAccessToken(user);
-  //     const refreshToken = await this.generateRefreshToken(user);
-  //
-  //     if (!refreshToken || !accessToken) throw new Error('error');
-  //
-  //     user.refreshToken = refreshToken;
-  //     await user.save();
-  //
-  //     const loggedInUser = await this.userModel
-  //       .findById(user._id)
-  //       .select('-password -refreshToken');
-  //
-  //     return;
-  //   }
+    if (existingUserEmail) {
+      throw new HttpException(
+        `User already exists with this ${existingUserEmail}.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-  async validatePassword(
+    const existingUserUsername = await this.findOneUserByUsername(
+      registerUserDTO.username,
+    );
+
+    if (existingUserUsername) {
+      throw new HttpException(
+        `User already exists with this ${existingUserUsername}.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const registeringUser = new this.userModel({
+      ...registerUserDTO,
+    });
+
+    const user = await registeringUser.save();
+
+    return {
+      message: 'User registered successfully',
+      data: user,
+    };
+  }
+
+  private async validatePassword(
     plainPassword: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    const isPasswordValid = await bcryptjs.compare(
-      plainPassword,
-      hashedPassword,
+    return await bcryptjs.compare(plainPassword, hashedPassword);
+  }
+
+  async logInUser(logInUserDTO: LogInUserDTO): Promise<IUserLogInResponse> {
+    const user = await this.findOneUserByEmail(logInUserDTO.email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await this.validatePassword(
+      logInUserDTO.password,
+      user.password,
     );
-    return isPasswordValid;
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+
+    return {
+      message: 'Login successful',
+      data: user,
+      accessToken,
+      refreshToken,
+    };
   }
 
   //
@@ -155,38 +171,56 @@ export class UsersService {
   //       logOutUser: logOutUser,
   //     };
   //   }
+
   async findOneUserById(userId: string): Promise<IUserResponse> {
     const user = await this.userModel
       .findById(userId)
       .populate('books')
       .select('-password -refreshToken -role')
       .exec();
+    console.log(user);
 
     if (!user) {
-      return { message: 'User not found', data: null };
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     return {
       message: 'User found',
-      data: {
-        username: user.username,
-        firstName: user?.firstName,
-        lastName: user?.lastName,
-        email: user.email,
-        role: {
-          name: user.role,
-        },
-      },
+      data: user,
     };
   }
 
-  async findOneUserByUsername(username: string): Promise<IUserResponse> {
-    const user = await this.userModel.findOne({ $or: [{ username }] }).exec();
-    return { message: '', data: user };
+  async findOneUserByEmail(email: string): Promise<UserDocument | null> {
+    const user = await this.userModel
+      .findOne({ email: email })
+      .populate('books')
+      .select('-password -refreshToken -role')
+      .exec();
+
+    if (user) {
+      throw new HttpException(
+        `User with email ${email} already exists`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return null;
   }
 
-  async findOneUserByEmail(email: string): Promise<IUserResponse> {
-    const user = await this.userModel.findOne({ $or: [{ email }] }).exec();
-    return { message: '', data: user };
+  async findOneUserByUsername(username: string): Promise<UserDocument | null> {
+    const user = await this.userModel
+      .findOne({ username: username })
+      .populate('books')
+      .select('-password -refreshToken -role')
+      .exec();
+
+    if (user) {
+      throw new HttpException(
+        `User with username ${username} already exists`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return null;
   }
 }

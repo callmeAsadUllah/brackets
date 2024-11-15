@@ -1,6 +1,5 @@
-import { ObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 import { IRole } from 'src/roles/role.interface';
-import { RoleEnum } from 'src/roles/roles.enum';
 
 export interface IUser {
   username: string;
@@ -13,7 +12,7 @@ export interface IUser {
   // relationship
   role: IRole;
   // relationship
-  books?: ObjectId[];
+  books?: Types.ObjectId[];
 }
 
 export interface IResponse {
@@ -22,19 +21,16 @@ export interface IResponse {
 
 export interface IUserResponse {
   message: string;
-  data: {
-    username: string;
-    firstName?: string;
-    lastName?: string;
-    email: string;
-    role: {
-      name: RoleEnum;
-    };
-  } | null;
+  data:
+    | (Omit<IUser, 'password' | 'refreshToken' | 'role'> & {
+        books?: Types.ObjectId[];
+      })
+    | null;
 }
+
 export interface IUserRegisterResponse {
   message: string;
-  data: Omit<IUser, 'password' | 'role'>;
+  data: Omit<IUser, 'password' | 'refreshToken' | 'role' | 'books'>;
 }
 
 export interface IUserLogInResponse {

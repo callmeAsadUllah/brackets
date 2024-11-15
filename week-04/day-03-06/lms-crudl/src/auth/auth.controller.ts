@@ -1,12 +1,22 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import {
+  Res,
+  Body,
+  Controller,
+  Post,
+  UsePipes,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDTO } from 'src/users/register-user.dto';
 import { HashPasswordPipe } from 'src/hash-password/hash-password.pipe';
-// import { LogInUserDTO } from 'src/users/log-in-user.dto';
-// import { Response, Request } from 'express';
+import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 // import { RefreshTokenPipe } from 'src/refresh-token/refresh-token.pipe';
-import { IUserResponse } from 'src/interfaces/response.interface';
+import {
+  IUserLogInResponse,
+  IUserRegisterResponse,
+} from 'src/interfaces/response.interface';
+import { LogInUserDTO } from 'src/users/log-in-user.dto';
 
 // interface LoggedUser {
 //   user: {
@@ -30,20 +40,20 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
   ) {}
-  // @Post('register')
-  // @UsePipes(HashPasswordPipe)
-  // async registerUser(
-  //   @Body() registerUserDTO: RegisterUserDTO,
-  // ): Promise<IUserResponse> {
-  //   const user = await this.authService.registerUser(registerUserDTO);
-  //   return user;
-  // }
+  @Post('register')
+  @UsePipes(HashPasswordPipe)
+  async registerUser(
+    @Body() registerUserDTO: RegisterUserDTO,
+  ): Promise<IUserRegisterResponse> {
+    const user = await this.authService.registerUser(registerUserDTO);
+    return user;
+  }
 
   //   @Post('log-in')
   //   async logInUser(
   //     @Body() logInUserDTO: LogInUserDTO,
   //     @Res({ passthrough: true }) response: Response,
-  //   ): Promise<LoggedUser> {
+  //   ): Promise<IUserLogInResponse> {
   //     const loggedUser = await this.authService.logInUser(logInUserDTO);
   //
   //     const options = {
@@ -67,7 +77,36 @@ export class AuthController {
   //       accessToken: (loggedUser as LoggedUser).accessToken,
   //       refreshToken: (loggedUser as LoggedUser).refreshToken,
   //     };
-  //   }
+  // }
+
+  @Post('log-in')
+  async logInUser(
+    @Body() logInUserDTO: LogInUserDTO,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<IUserLogInResponse> {
+    try {
+      const { user, accessToken, refreshToken }: any =
+        await this.authService.logInUser(logInUserDTO);
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+      };
+
+      response.cookie('accessToken', accessToken, cookieOptions);
+      response.cookie('refreshToken', refreshToken, cookieOptions);
+
+      return {
+        message: 'Login successful',
+        data: user,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      };
+    } catch (error) {
+      response.status(HttpStatus.UNAUTHORIZED).json({
+        message: 'Invalid credentials or login error',
+      });
+    }
+  }
   //
   //   @Get('refresh-token')
   //   @UsePipes(RefreshTokenPipe)

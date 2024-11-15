@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { RoleEnum } from './roles.enum';
 import { Observable } from 'rxjs';
 
@@ -16,11 +11,11 @@ export class RolesGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('Access denied. User not authenticated.');
+      throw new Error('Access denied. User not authenticated.');
     }
 
-    if (user.role !== RoleEnum.USER) {
-      throw new ForbiddenException('Access denied. Insufficient permissions.');
+    if (user.role !== RoleEnum.ADMIN) {
+      throw new Error('Access denied. Insufficient permissions.');
     }
 
     return true;

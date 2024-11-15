@@ -28,7 +28,7 @@ export class User {
   role: RoleEnum;
 
   // relationship
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Book' }] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Book' }], default: [] })
   books: Types.ObjectId[];
 }
 

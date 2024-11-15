@@ -16,7 +16,7 @@ export class Book {
   publishedDate?: Date;
 
   // relationship
-  @Prop({ type: String, enum: GenreEnum, default: null })
+  @Prop({ type: String, enum: GenreEnum, required: true })
   genre: GenreEnum;
 }
 

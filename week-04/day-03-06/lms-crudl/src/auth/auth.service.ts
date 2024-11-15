@@ -3,6 +3,7 @@ import { RegisterUserDTO } from '../users/register-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { IUserResponse } from 'src/interfaces/response.interface';
+import { LogInUserDTO } from 'src/users/log-in-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,15 +33,15 @@ export class AuthService {
     return expiry;
   }
 
-  // async registerUser(registerUserDTO: RegisterUserDTO): Promise<IUserResponse> {
-  //   const user = await this.usersService.registerUser(registerUserDTO);
-  //   return user;
-  // }
+  async registerUser(registerUserDTO: RegisterUserDTO): Promise<IUserResponse> {
+    const user = await this.usersService.registerUser(registerUserDTO);
+    return user;
+  }
 
-  //   async logInUser(logInUserDTO: LogInUserDTO): Promise<object> {
-  //     const user = await this.usersService.logInUser(logInUserDTO);
-  //     return user;
-  //   }
+  async logInUser(logInUserDTO: LogInUserDTO): Promise<object> {
+    const user = await this.usersService.logInUser(logInUserDTO);
+    return user;
+  }
   //
   //   async refreshToken(refreshToken: string): Promise<object> {
   //     const user = await this.usersService.refreshToken(refreshToken);
