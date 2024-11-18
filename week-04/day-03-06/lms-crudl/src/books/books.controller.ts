@@ -8,6 +8,10 @@ import {
   Delete,
   Body,
   Param,
+  NotFoundException,
+  Query,
+  UsePipes,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
@@ -17,60 +21,96 @@ import { CreateBookDTO } from './create-book.dto';
 import { RoleEnum } from 'src/roles/roles.enum';
 import { UpdateBookPartialDTO } from './update-book-partial.dto';
 import { BookDocument } from './book.type';
+import { VerifyAdminGuard } from 'src/guards/verify-admin.guard';
+import { PaginationPipe } from 'src/pipes/pagination/pagination.pipe';
+import { VerifyAccessTokenInterceptor } from 'src/interceptors/verify-access-token.interceptor';
 
 @Controller('books')
 @UseGuards(RolesGuard)
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
-  @Get()
-  @Roles(RoleEnum.ADMIN, RoleEnum.USER)
-  async findListBooks(): Promise<BookDocument[]> {
-    const books = await this.booksService.findListBooks();
-    return books;
-  }
-
   @Post()
+  @UseGuards(VerifyAdminGuard)
   @Roles(RoleEnum.ADMIN)
   async createBook(
-    @Body() createBookDto: CreateBookDTO,
+    @Body() createBookDTO: CreateBookDTO,
   ): Promise<BookDocument> {
-    return await this.booksService.createBook(createBookDto);
+    return await this.booksService.createBook(createBookDTO);
   }
 
   @Put(':bookId')
+  @UseGuards(VerifyAdminGuard)
   @Roles(RoleEnum.ADMIN)
-  async updateBookById(
+  async updateBook(
+    @Body() updateBookDTO: UpdateBookDTO,
     @Param('bookId') bookId: string,
-    @Body() updateBookDto: UpdateBookDTO,
-  ) {
-    const book = await this.booksService.updateBookById(bookId, updateBookDto);
-    return book;
+  ): Promise<BookDocument> {
+    return await this.booksService.updateBook(updateBookDTO, bookId);
   }
 
   @Patch(':bookId')
+  @UseGuards(VerifyAdminGuard)
   @Roles(RoleEnum.ADMIN)
-  async updateBookByIdPartial(
-    @Param('bookId') bookId: string,
+  async updateBookPartial(
     @Body() updateBookPartialDTO: UpdateBookPartialDTO,
-  ) {
-    const book = await this.booksService.updateBookByIdPartial(
-      bookId,
-      updateBookPartialDTO,
-    );
-    return book;
+    @Param('bookId') bookId: string,
+  ): Promise<BookDocument> {
+    return await this.booksService.updateBook(updateBookPartialDTO, bookId);
   }
 
-  @Get(':bookId')
+  @Get('list')
+  @UsePipes(PaginationPipe)
   @Roles(RoleEnum.ADMIN, RoleEnum.USER)
-  async findOneBookById(@Param('bookId') bookId: string) {
-    const book = await this.booksService.findOneBookById(bookId);
-    return book;
+  async findListBooks(
+    @Query() paginationParams: { page: number; limit: number },
+  ): Promise<{
+    data: BookDocument[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return await this.booksService.findListBooks(paginationParams);
+  }
+
+  @Get(':title')
+  @Roles(RoleEnum.ADMIN, RoleEnum.USER)
+  async findBookByTitle(
+    @Query('title') title: string,
+  ): Promise<BookDocument[]> {
+    const books = await this.booksService.findBookByTitle(title);
+    if (books.length === 0) {
+      throw new NotFoundException(
+        `No books found with name containing "${title}"`,
+      );
+    }
+    return books;
+  }
+
+  @Post(':bookId/borrow')
+  @UseInterceptors(VerifyAccessTokenInterceptor)
+  @Roles(RoleEnum.ADMIN, RoleEnum.USER)
+  async findBorrowedBooksByUserId(
+    @Param('userId') userId: string,
+    @Param('bookId') bookId: string,
+  ): Promise<string> {
+    return await this.booksService.findBorrowedBooksByUserId(userId, bookId);
+  }
+
+  @Post(':bookId/return')
+  @UseInterceptors(VerifyAccessTokenInterceptor)
+  @Roles(RoleEnum.ADMIN, RoleEnum.USER)
+  async findReturnedBooksByUserId(
+    @Param('userId') userId: string,
+    @Param('bookId') bookId: string,
+  ): Promise<string> {
+    return await this.booksService.findReturnedBooksByUserId(userId, bookId);
   }
 
   @Delete(':bookId')
+  @UseGuards(VerifyAdminGuard)
   @Roles(RoleEnum.ADMIN)
-  async deleteBookById(@Param('bookId') bookId: string) {
-    await this.booksService.deleteBookById(bookId);
+  async deleteBookById(@Param('bookId') bookId: string): Promise<BookDocument> {
+    return await this.booksService.deleteBookById(bookId);
   }
 }

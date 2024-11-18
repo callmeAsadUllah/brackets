@@ -3,6 +3,8 @@ import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
 import { Book, BookSchema } from './book.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
+import { User, UserSchema } from 'src/users/user.schema';
 
 @Module({
   imports: [
@@ -14,9 +16,17 @@ import { MongooseModule } from '@nestjs/mongoose';
         },
       },
     ]),
+    MongooseModule.forFeatureAsync([
+      {
+        name: User.name,
+        useFactory: () => {
+          return UserSchema;
+        },
+      },
+    ]),
   ],
   exports: [BooksService],
   controllers: [BooksController],
-  providers: [BooksService],
+  providers: [BooksService, JwtService],
 })
 export class BooksModule {}

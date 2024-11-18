@@ -1,6 +1,9 @@
 import { Types } from 'mongoose';
 import { IRole } from 'src/roles/role.interface';
 
+export interface IResponse {
+  message: string;
+}
 export interface IUser {
   username: string;
   firstName?: string;
@@ -13,10 +16,6 @@ export interface IUser {
   role: IRole;
   // relationship
   books?: Types.ObjectId[];
-}
-
-export interface IResponse {
-  message: string;
 }
 
 export interface IUserResponse {

@@ -1,22 +1,22 @@
 import {
   Res,
   Body,
+  Get,
   Controller,
   Post,
   UsePipes,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDTO } from 'src/users/register-user.dto';
-import { HashPasswordPipe } from 'src/hash-password/hash-password.pipe';
-import { Response } from 'express';
+import { HashPasswordPipe } from 'src/pipes/hash-password/hash-password.pipe';
+import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 // import { RefreshTokenPipe } from 'src/refresh-token/refresh-token.pipe';
-import {
-  IUserLogInResponse,
-  IUserRegisterResponse,
-} from 'src/interfaces/response.interface';
 import { LogInUserDTO } from 'src/users/log-in-user.dto';
+import { User } from 'src/users/user.schema';
+import { RefreshTokenPipe } from 'src/pipes/refresh-token/refresh-token.pipe';
 
 // interface LoggedUser {
 //   user: {
@@ -42,9 +42,7 @@ export class AuthController {
   ) {}
   @Post('register')
   @UsePipes(HashPasswordPipe)
-  async registerUser(
-    @Body() registerUserDTO: RegisterUserDTO,
-  ): Promise<IUserRegisterResponse> {
+  async registerUser(@Body() registerUserDTO: RegisterUserDTO): Promise<User> {
     const user = await this.authService.registerUser(registerUserDTO);
     return user;
   }
@@ -83,76 +81,73 @@ export class AuthController {
   async logInUser(
     @Body() logInUserDTO: LogInUserDTO,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<IUserLogInResponse> {
+  ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
     try {
-      const { user, accessToken, refreshToken }: any =
-        await this.authService.logInUser(logInUserDTO);
+      const loggedInUser = await this.authService.logInUser(logInUserDTO);
+
       const cookieOptions = {
         httpOnly: true,
-        secure: true,
       };
 
-      response.cookie('accessToken', accessToken, cookieOptions);
-      response.cookie('refreshToken', refreshToken, cookieOptions);
+      response.cookie('accessToken', loggedInUser.accessToken, cookieOptions);
+      response.cookie('refreshToken', loggedInUser.refreshToken, cookieOptions);
 
       return {
-        message: 'Login successful',
-        data: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+        user: loggedInUser.user,
+        accessToken: loggedInUser.accessToken,
+        refreshToken: loggedInUser.refreshToken,
       };
-    } catch (error) {
+    } catch {
       response.status(HttpStatus.UNAUTHORIZED).json({
         message: 'Invalid credentials or login error',
       });
     }
   }
-  //
-  //   @Get('refresh-token')
-  //   @UsePipes(RefreshTokenPipe)
-  //   public async refreshToken(
-  //     @Req() request: Request,
-  //     @Res({ passthrough: true }) response: Response,
-  //   ): Promise<RefreshedToken> {
-  //     const refreshToken = request.cookies['refreshToken'];
-  //
-  //     const refreshedToken = await this.authService.refreshToken(refreshToken);
-  //
-  //     const Options = {
-  //       httpOnly: true,
-  //       secure: true,
-  //     };
-  //     response.cookie(
-  //       'accessToken',
-  //       (refreshedToken as RefreshedToken).accessToken,
-  //       Options,
-  //     );
-  //     response.cookie(
-  //       'refreshToken',
-  //       (refreshedToken as RefreshedToken).refreshToken,
-  //       Options,
-  //     );
-  //
-  //     return {
-  //       accessToken: (refreshedToken as RefreshedToken).accessToken,
-  //       refreshToken: (refreshedToken as RefreshedToken).refreshToken,
-  //     };
-  //   }
-  //   @Post('log-out')
-  //   async logout(
-  //     @Body() userId: string,
-  //     @Req() request: Request,
-  //     @Res({ passthrough: true }) response: Response,
-  //   ): Promise<{ message: string }> {
-  //     await this.authService.logOutUser(userId);
-  //
-  //     const cookieOptions = {
-  //       httpOnly: true,
-  //       secure: true,
-  //     };
-  //     response.clearCookie('accessToken', cookieOptions);
-  //     response.clearCookie('refreshToken', cookieOptions);
-  //
-  //     return { message: 'Logged out successfully' };
-  //   }
+
+  @Get('refresh-token')
+  @UsePipes(RefreshTokenPipe)
+  public async refreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const refreshTokenFromCookie = request.cookies['refreshToken'];
+
+    const refreshedToken = await this.authService.refreshToken(
+      refreshTokenFromCookie,
+    );
+
+    const Options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    response.cookie('accessToken', refreshedToken.accessToken, Options);
+    response.cookie('refreshToken', refreshedToken.refreshToken, Options);
+
+    return {
+      accessToken: refreshedToken.accessToken,
+      refreshToken: refreshedToken.refreshToken,
+    };
+  }
+
+  @Post('log-out')
+  async logout(
+    @Body() { userId }: { userId: string },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ user: User }> {
+    const responseFromAuthService = await this.authService.logOutUser(userId);
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    if (responseFromAuthService) {
+      {
+        response.clearCookie('accessToken', cookieOptions);
+        response.clearCookie('refreshToken', cookieOptions);
+      }
+      return responseFromAuthService;
+    }
+  }
 }

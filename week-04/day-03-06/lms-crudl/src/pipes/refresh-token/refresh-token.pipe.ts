@@ -9,5 +9,6 @@ export class RefreshTokenPipe implements PipeTransform {
     if (!refreshToken) {
       throw new BadRequestException('Refresh token is missing in cookies');
     }
+    return refreshToken;
   }
 }

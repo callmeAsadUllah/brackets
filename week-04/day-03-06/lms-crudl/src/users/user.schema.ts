@@ -18,18 +18,15 @@ export class User {
 
   @Prop({ required: true })
   password: string;
-
-  // refresh token
+  // refresh-token
   @Prop({ required: false })
   refreshToken?: string;
-
   // relationship
-  @Prop({ type: String, enum: RoleEnum, default: RoleEnum.USER })
+  @Prop({ type: String, enum: RoleEnum, default: RoleEnum.ADMIN })
   role: RoleEnum;
-
   // relationship
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Book' }], default: [] })
-  books: Types.ObjectId[];
+  books: Types.Array<Types.ObjectId>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsDate, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  IsArray,
+  IsNotEmpty,
+  IsPositive,
+} from 'class-validator';
+import { Types } from 'mongoose';
 import { GenreEnum } from 'src/genres/genre.enum';
 
 export class UpdateBookPartialDTO {
@@ -18,7 +27,15 @@ export class UpdateBookPartialDTO {
   @IsDate()
   publishedDate?: Date;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsPositive()
+  numberOfAvailableCopies: number;
+
+  @IsNotEmpty()
   @IsEnum(GenreEnum)
-  genre?: GenreEnum;
+  genre: GenreEnum;
+
+  @IsOptional()
+  @IsArray()
+  borrowedBy?: Types.ObjectId[];
 }

@@ -20,4 +20,8 @@ export class RegisterUserDTO {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
 }
