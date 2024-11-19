@@ -9,12 +9,13 @@ import {
   Put,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
-import { IResponse, IBook } from 'src/common/interfaces/response.interface';
+import { IResponse } from 'src/common/interfaces/response.interface';
 import {
   CreateBookDTO,
   UpdateBookDTO,
   UpdateBookPartialDTO,
 } from './dtos/book.dto';
+import { IBook } from 'src/common/interfaces/book.interface';
 
 @Controller('books')
 export class BooksController {
@@ -44,7 +45,7 @@ export class BooksController {
     @Param('bookId') bookId: string,
     @Body() updateBookDTO: UpdateBookDTO,
   ): Promise<IResponse<IBook>> {
-    return this.booksService.updateBook(bookId, updateBookDTO);
+    return this.booksService.findOneBookByIdAndUpdate(bookId, updateBookDTO);
   }
 
   // Partially update a book (PATCH)
@@ -53,7 +54,10 @@ export class BooksController {
     @Param('bookId') bookId: string,
     @Body() updateBookPartialDTO: UpdateBookPartialDTO,
   ): Promise<IResponse<IBook>> {
-    return this.booksService.updateBookPartial(bookId, updateBookPartialDTO);
+    return this.booksService.findOneBookByIdAndUpdatePartial(
+      bookId,
+      updateBookPartialDTO,
+    );
   }
 
   @Delete(':bookId')

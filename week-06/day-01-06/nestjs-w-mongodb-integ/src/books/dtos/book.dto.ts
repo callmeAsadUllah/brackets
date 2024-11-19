@@ -1,4 +1,5 @@
 import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateBookDTO {
   @IsNotEmpty()
@@ -10,12 +11,11 @@ export class CreateBookDTO {
   description?: string;
 
   @IsNotEmpty()
-  @IsString()
-  author: string;
-
-  @IsNotEmpty()
   @IsDate()
   publishedDate: Date;
+
+  @IsNotEmpty()
+  author: Types.ObjectId;
 }
 
 export class UpdateBookDTO {
@@ -28,12 +28,11 @@ export class UpdateBookDTO {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  author?: string;
-
-  @IsOptional()
   @IsDate()
   publishedDate?: Date;
+
+  @IsOptional()
+  author?: Types.ObjectId;
 }
 
 export class UpdateBookPartialDTO {
@@ -46,10 +45,9 @@ export class UpdateBookPartialDTO {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  author?: string;
-
-  @IsOptional()
   @IsDate()
   publishedDate?: Date;
+
+  @IsOptional()
+  author?: Types.ObjectId;
 }

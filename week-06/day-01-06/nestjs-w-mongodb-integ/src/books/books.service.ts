@@ -7,33 +7,31 @@ import {
   UpdateBookDTO,
   UpdateBookPartialDTO,
 } from './dtos/book.dto';
-import { IBook, IResponse } from 'src/common/interfaces/response.interface';
+import { IResponse } from 'src/common/interfaces/response.interface';
+import { IBook } from 'src/common/interfaces/book.interface';
 
 @Injectable()
 export class BooksService {
-  constructor(@InjectModel(Book.name) private bookModel: Model<BookDocument>) {}
+  constructor(
+    @InjectModel(Book.name) private booksModel: Model<BookDocument>,
+  ) {}
 
   async books(): Promise<IResponse<IBook[]>> {
-    const books = await this.bookModel.find().exec();
+    const books = await this.booksModel.find().populate('author').exec();
     return { message: 'Book fetched successfully', data: books };
   }
 
   async createBook(createBookDTO: CreateBookDTO): Promise<IResponse<IBook>> {
-    const book = new this.bookModel(createBookDTO);
+    const book = new this.booksModel(createBookDTO);
     await book.save();
     return { message: 'Book created successfully', data: book };
   }
 
-  async findBookById(bookId: string): Promise<IResponse<IBook>> {
-    const book = await this.bookModel.findById(bookId).exec();
-    return { message: 'Book fetched successfully', data: book };
-  }
-
-  async updateBook(
+  async findOneBookByIdAndUpdate(
     bookId: string,
     updateBookDTO: UpdateBookDTO,
   ): Promise<IResponse<IBook>> {
-    const updatedBook = await this.bookModel
+    const updatedBook = await this.booksModel
       .findByIdAndUpdate(bookId, updateBookDTO, {
         new: true,
         runValidators: true,
@@ -46,11 +44,11 @@ export class BooksService {
     };
   }
 
-  async updateBookPartial(
+  async findOneBookByIdAndUpdatePartial(
     bookId: string,
     updateBookPartialDTO: UpdateBookPartialDTO,
   ): Promise<IResponse<IBook>> {
-    const updatedBook = await this.bookModel
+    const updatedBook = await this.booksModel
       .findByIdAndUpdate(bookId, updateBookPartialDTO, {
         new: true,
         runValidators: true,
@@ -63,8 +61,16 @@ export class BooksService {
     };
   }
 
+  async findBookById(bookId: string): Promise<IResponse<IBook>> {
+    const book = await this.booksModel
+      .findById(bookId)
+      .populate('author')
+      .exec();
+    return { message: 'Book fetched successfully', data: book };
+  }
+
   async deleteBook(bookId: string): Promise<IResponse<void>> {
-    await this.bookModel.findByIdAndDelete(bookId).exec();
+    await this.booksModel.findByIdAndDelete(bookId).exec();
     return { message: 'Book deleted successfully', data: null };
   }
 }

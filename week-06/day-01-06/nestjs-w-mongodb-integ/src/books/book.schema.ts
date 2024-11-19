@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type BookDocument = Book & Document;
 
@@ -12,10 +12,10 @@ export class Book {
   description?: string;
 
   @Prop({ required: true })
-  author: string;
-
-  @Prop({ required: true })
   publishedDate: Date;
+
+  @Prop({ type: Types.ObjectId, ref: 'Author', required: true })
+  author: Types.ObjectId;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);
