@@ -20,14 +20,24 @@ export class BooksService {
     @InjectModel(Author.name) private authorsModel: Model<AuthorDocument>,
   ) {}
 
-  async findManyBooks(): Promise<IResponse<IBook[]>> {
-    const books = await this.booksModel.find().populate('authors').exec();
+  async findManyBooks(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<IResponse<IBook[]>> {
+    const books = await this.booksModel
+      .find()
+      .populate('authors')
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
 
     return { message: 'Book fetched successfully', data: books };
   }
 
   async searchBooks(
-    search: string,
+    search?: string,
+    page: number = 1,
+    limit: number = 10,
   ): Promise<IResponse<IBook[]>> {
     try {
       const books = await this.booksModel
@@ -50,6 +60,8 @@ export class BooksService {
               ],
             },
           },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
         ])
         .exec();
 

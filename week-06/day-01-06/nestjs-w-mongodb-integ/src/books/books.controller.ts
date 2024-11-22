@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -18,14 +19,14 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Get()
-  async searchBooks(
-    @Query('search') search: string,
+  async findManyBooks(
+    @Query('search') search?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
   ): Promise<IResponse<IBook[]>> {
-    return await this.booksService.searchBooks(search);
-  }
-  @Get()
-  async findManyBooks(): Promise<IResponse<IBook[]>> {
-    return await this.booksService.findManyBooks();
+    return search
+      ? await this.booksService.searchBooks(search, page, limit)
+      : await this.booksService.findManyBooks(page, limit);
   }
 
   @Post()
@@ -39,7 +40,11 @@ export class BooksController {
   async findBookById(
     @Param('bookId') bookId: string,
   ): Promise<IResponse<IBook>> {
-    return await this.booksService.findBookById(bookId);
+    try {
+      return await this.booksService.findBookById(bookId);
+    } catch {
+      throw new NotFoundException(`Book with ID ${bookId} not found.`);
+    }
   }
 
   @Patch(':bookId')
