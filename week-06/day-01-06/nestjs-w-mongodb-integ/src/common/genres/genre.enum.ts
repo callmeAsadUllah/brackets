@@ -1,4 +1,4 @@
-export enum GenreEnum {
+export enum Genres {
   SCIENCE_FICTION = 'SCIENCE_FICTION',
   FANTASY = 'FANTASY',
   MYSTERY = 'MYSTERY',

@@ -1,5 +1,17 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
+  IsDate,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Types } from 'mongoose';
+import { Genres } from 'src/common/genres/genre.enum';
 
 export class CreateBookDTO {
   @IsNotEmpty()
@@ -10,12 +22,24 @@ export class CreateBookDTO {
   @IsString()
   description?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDate()
-  publishedDate: Date;
+  @Type(() => Date)
+  publishedDate?: Date;
 
   @IsNotEmpty()
-  author: Types.ObjectId;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsEnum(Genres, { each: true })
+  genres: Genres[];
+
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsMongoId({ each: true })
+  authors: Types.ObjectId[];
 }
 
 export class UpdateBookDTO {
@@ -29,10 +53,22 @@ export class UpdateBookDTO {
 
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   publishedDate?: Date;
 
   @IsOptional()
-  author?: Types.ObjectId;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsEnum(Genres, { each: true })
+  genres?: Genres[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsMongoId({ each: true })
+  authors?: Types.ObjectId[];
 }
 
 export class UpdateBookPartialDTO {
@@ -46,8 +82,20 @@ export class UpdateBookPartialDTO {
 
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   publishedDate?: Date;
 
   @IsOptional()
-  author?: Types.ObjectId;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsEnum(Genres, { each: true })
+  genres?: Genres[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsMongoId({ each: true })
+  authors?: Types.ObjectId[];
 }

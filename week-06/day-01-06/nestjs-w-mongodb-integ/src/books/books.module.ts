@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Book, BookSchema } from './book.schema';
 import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
 import { AuthorsModule } from 'src/authors/authors.module';
+import { Author, AuthorSchema } from 'src/authors/author.schema';
 
 @Module({
   imports: [
@@ -14,8 +15,14 @@ import { AuthorsModule } from 'src/authors/authors.module';
           return BookSchema;
         },
       },
+      {
+        name: Author.name,
+        useFactory: () => {
+          return AuthorSchema;
+        },
+      },
     ]),
-    AuthorsModule,
+    forwardRef(() => AuthorsModule),
   ],
   controllers: [BooksController],
   providers: [BooksService],
