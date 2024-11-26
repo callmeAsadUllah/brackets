@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Book, BookSchema } from './book.schema';
 import { BooksController } from './books.controller';
@@ -22,7 +22,7 @@ import { Author, AuthorSchema } from 'src/authors/author.schema';
         },
       },
     ]),
-    forwardRef(() => AuthorsModule),
+    AuthorsModule,
   ],
   controllers: [BooksController],
   providers: [BooksService],

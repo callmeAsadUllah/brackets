@@ -21,52 +21,37 @@ export class BooksService {
   ) {}
 
   async findManyBooks(
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<IResponse<IBook[]>> {
-    const books = await this.booksModel
-      .find()
-      .populate('authors')
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
-
-    return { message: 'Book fetched successfully', data: books };
-  }
-
-  async searchBooks(
     search?: string,
+    title?: string,
+    description?: string,
     page: number = 1,
     limit: number = 10,
   ): Promise<IResponse<IBook[]>> {
     try {
+      const skip = (page - 1) * limit;
+
+      const searchQuery = search ? { $text: { $search: search } } : {};
+
+      const titleQuery = title
+        ? { title: { $regex: title, $options: 'i' } }
+        : {};
+
+      const descriptionQuery = description
+        ? { description: { $regex: description, $options: 'i' } }
+        : {};
+
+      const query = { ...titleQuery, ...descriptionQuery, ...searchQuery };
+
       const books = await this.booksModel
-        .aggregate([
-          {
-            $match: {
-              $or: [
-                {
-                  title: {
-                    $regex: search,
-                    $options: 'i',
-                  },
-                },
-                {
-                  description: {
-                    $regex: search,
-                    $options: 'i',
-                  },
-                },
-              ],
-            },
-          },
-          { $skip: (page - 1) * limit },
-          { $limit: limit },
-        ])
+        .find(query)
+        .sort()
+        .populate('author')
+        .skip(skip)
+        .limit(limit)
         .exec();
 
       return {
-        message: `Books fetched successfully with search-query=${search}`,
+        message: `Books fetched successfully`,
         data: books,
       };
     } catch {
@@ -79,19 +64,20 @@ export class BooksService {
     session.startTransaction();
 
     try {
-      const { authors } = createBookDTO;
+      const { author } = createBookDTO;
 
-      const authorIds = authors.map((authorId) => new Types.ObjectId(authorId));
+      const authorId = new Types.ObjectId(author);
+
       const createdBook = new this.booksModel({
         ...createBookDTO,
-        authors: authorIds,
+        author: authorId,
       });
 
       const bookId = createdBook._id;
 
       await this.authorsModel
         .findByIdAndUpdate(
-          authorIds,
+          author,
           { $addToSet: { books: bookId } },
           { new: true, session },
         )
@@ -121,32 +107,24 @@ export class BooksService {
     const session = await this.booksModel.startSession();
     session.startTransaction();
     try {
-      const { authors, ...updatedBookData } = updateBookPartialDTO;
-      const authorIds = authors.map((authorId) => new Types.ObjectId(authorId));
-
+      const { author, ...updatedBookData } = updateBookPartialDTO;
       const updatedBookPartial = await this.booksModel
         .findByIdAndUpdate(
           bookId,
-          {
-            ...updatedBookData,
-            $addToSet: {
-              authors: { $each: authorIds },
-            },
-          },
-          {
-            new: true,
-            runValidators: true,
-          },
+          { ...updatedBookData, author: author },
+          { new: true, runValidators: true, session },
         )
         .exec();
 
-      await this.authorsModel
-        .findByIdAndUpdate(
-          authorIds,
-          { $addToSet: { books: bookId } },
-          { new: true, session },
-        )
-        .exec();
+      if (author) {
+        await this.authorsModel
+          .findByIdAndUpdate(
+            author,
+            { $addToSet: { books: bookId } },
+            { new: true, runValidators: true, session },
+          )
+          .exec();
+      }
 
       await session.commitTransaction();
 
@@ -165,10 +143,18 @@ export class BooksService {
 
   async findBookById(bookId: string): Promise<IResponse<IBook>> {
     try {
-      const book = await this.booksModel
-        .findById(bookId)
-        .populate('authors')
-        .exec();
+      const book = await this.booksModel.aggregate([
+        { $match: { _id: new Types.ObjectId(bookId) } },
+        {
+          $lookup: {
+            from: 'authors',
+            localField: 'author',
+            foreignField: '_id',
+            as: 'author',
+          },
+        },
+        { $unwind: '$author' },
+      ]);
       if (!book) {
         throw new NotFoundException();
       }
@@ -190,16 +176,14 @@ export class BooksService {
         .findById(bookId)
         .populate('authors')
         .exec();
-      const { authors } = book;
+      if (!book) {
+        throw new NotFoundException('Book not found');
+      }
 
-      const authorIds = authors.map((authorId) => new Types.ObjectId(authorId));
+      const authorId = book.author;
 
       await this.authorsModel
-        .updateMany(
-          { _id: { $in: authorIds } },
-          { $pull: { books: bookId } },
-          { session },
-        )
+        .findByIdAndUpdate(authorId, { $pull: { books: bookId } }, { session })
         .exec();
 
       await this.booksModel.findByIdAndDelete(bookId).session(session).exec();

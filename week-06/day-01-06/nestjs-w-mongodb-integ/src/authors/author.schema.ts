@@ -8,16 +8,15 @@ export class Author {
   @Prop({ type: String, required: true, unique: true })
   fullName: string;
 
-  @Prop({ type: Date, required: false })
+  @Prop({ type: Date })
   dob?: Date;
 
-  @Prop({ type: String, required: false })
+  @Prop({ type: String })
   bio?: string;
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Book' }],
-    required: false,
-    index: true,
+    default: [],
   })
   books?: Types.ObjectId[];
 }

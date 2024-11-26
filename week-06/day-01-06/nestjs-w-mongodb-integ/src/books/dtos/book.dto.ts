@@ -11,7 +11,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { Genres } from 'src/common/genres/genre.enum';
+import { Genres } from 'src/common/enums/genre.enum';
 
 export class CreateBookDTO {
   @IsNotEmpty()
@@ -35,11 +35,8 @@ export class CreateBookDTO {
   genres: Genres[];
 
   @IsNotEmpty()
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayUnique()
-  @IsMongoId({ each: true })
-  authors: Types.ObjectId[];
+  @IsMongoId()
+  author: Types.ObjectId;
 }
 
 export class UpdateBookDTO {
@@ -64,11 +61,8 @@ export class UpdateBookDTO {
   genres?: Genres[];
 
   @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayUnique()
-  @IsMongoId({ each: true })
-  authors?: Types.ObjectId[];
+  @IsMongoId()
+  author?: Types.ObjectId;
 }
 
 export class UpdateBookPartialDTO {
@@ -93,9 +87,6 @@ export class UpdateBookPartialDTO {
   genres?: Genres[];
 
   @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayUnique()
-  @IsMongoId({ each: true })
-  authors?: Types.ObjectId[];
+  @IsMongoId()
+  author: Types.ObjectId;
 }

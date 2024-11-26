@@ -63,9 +63,9 @@ export class AuthorsController {
   }
 
   @Delete(':authorId')
-  async findOneAuthorByAndDelete(
+  async findOneAuthorByIdAndDelete(
     @Param('authorId') authorId: string,
   ): Promise<IResponse<void>> {
-    return await this.authorsService.findOneAuthorByAndDelete(authorId);
+    return await this.authorsService.findOneAuthorByIdAndDelete(authorId);
   }
 }

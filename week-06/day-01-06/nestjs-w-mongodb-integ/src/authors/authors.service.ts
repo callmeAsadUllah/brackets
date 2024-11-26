@@ -68,7 +68,7 @@ export class AuthorsService {
     return { message: 'Author fetched successfully', data: author };
   }
 
-  async findOneAuthorByAndDelete(authorId: string): Promise<IResponse<void>> {
+  async findOneAuthorByIdAndDelete(authorId: string): Promise<IResponse<void>> {
     await this.authorsModel.findByIdAndDelete(authorId).exec();
     return { message: 'Author deleted successfully', data: null };
   }

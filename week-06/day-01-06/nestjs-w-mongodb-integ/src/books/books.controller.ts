@@ -21,12 +21,18 @@ export class BooksController {
   @Get()
   async findManyBooks(
     @Query('search') search?: string,
+    @Query('title') title?: string,
+    @Query('description') description?: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ): Promise<IResponse<IBook[]>> {
-    return search
-      ? await this.booksService.searchBooks(search, page, limit)
-      : await this.booksService.findManyBooks(page, limit);
+    return await this.booksService.findManyBooks(
+      search,
+      title,
+      description,
+      page,
+      limit,
+    );
   }
 
   @Post()
