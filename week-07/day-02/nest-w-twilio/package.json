@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@golevelup/nestjs-stripe": "^0.9.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.0.0",
@@ -27,6 +28,7 @@
     "dotenv": "^16.4.5",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "stripe": "^17.4.0",
     "twilio": "^5.3.6"
   },
   "devDependencies": {
@@ -37,6 +39,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/stripe": "^8.0.416",
     "@types/supertest": "^6.0.0",
     "@types/twilio": "^3.19.2",
     "@typescript-eslint/eslint-plugin": "^8.0.0",

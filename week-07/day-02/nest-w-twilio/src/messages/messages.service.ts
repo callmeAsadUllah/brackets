@@ -24,14 +24,12 @@ export class MessagesService {
   }
 
   private async getTwilioPhoneNumber(): Promise<string> {
-    const twilioPhoneNumber = this.configService.get<string>(
-      'TWILIO_PHONE_NUMBER',
-    );
+    const twilioPhoneNumber = this.configService.get<string>('TWILIO_NUMBER');
     return twilioPhoneNumber;
   }
 
   private async getMyPhoneNumber(): Promise<string> {
-    const myPhoneNumber = this.configService.get<string>('MY_PHONE_NUMBER');
+    const myPhoneNumber = this.configService.get<string>('TWILIO_USER_NUMBER');
     return myPhoneNumber;
   }
 
